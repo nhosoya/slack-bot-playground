@@ -24,7 +24,9 @@ end
 realtime_client.on :reaction_removed do |data|
   user_info = web_client.users_info(user: data.user)
   message = "#{user_info.user.name} が :#{data.reaction}: のリアクションを消したよ"
-  web_client.chat_postMessage(channel: '#times_hosoya', text: message, as_user: true)
+  puts message
+  # web_client.chat_postMessage(channel: '#times_hosoya', text: message, as_user: true)
+  web_client.reactions_add(name: data.reaction, channel: data.item.channel, timestamp: data.item.ts)
 end
 
 realtime_client.on :emoji_changed do |data|
