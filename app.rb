@@ -13,6 +13,7 @@ realtime_client = Slack::RealTime::Client.new
 web_client = Slack::Web::Client.new
 web_client.auth_test
 emoji_channel = ENV.fetch('EMOJI_CHANNEL') # channel ID or name
+channel_notification_channel = ENV.fetch('CHANNEL_NOTIFICATION_CHANNEL') # channel ID or name
 
 realtime_client.on :hello do
   puts "Successfully connected, welcome '#{realtime_client.self.name}' to the '#{realtime_client.team.name}' team at https://#{realtime_client.team.domain}.slack.com."
@@ -33,6 +34,12 @@ end
 realtime_client.on :emoji_changed do |data|
   break unless data.subtype == 'add'
   web_client.chat_postMessage(channel: emoji_channel, text: ":#{data.name}: が追加されたよ。使っていこう！", as_user: true)
+end
+
+realtime_client.on :channel_created do |data|
+  user_info = web_client.users_info(user: data.channel.creator)
+  message = "#{user_info.user.name} が ##{data.channel.name} を作ったよ。そーっとのぞいてみよう！"
+  web_client.chat_postMessage(channel: channel_notification_channel, text: message, as_user: true)
 end
 
 realtime_client.start!
