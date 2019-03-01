@@ -28,7 +28,14 @@ end
 
 realtime_client.on :emoji_changed do |data|
   break unless data.subtype == 'add'
-  web_client.chat_postMessage(channel: emoji_notification_channel, text: ":#{data.name}: が追加されたよ。使っていこう！", as_user: true)
+
+  message = if data.value.start_with?('alias:')
+    "`:#{data.name}:` が :#{data.value.split(":").last}: のaliasとして追加されたよ。使っていこう！"
+  else
+    ":#{data.name}: が追加されたよ。使っていこう！"
+  end
+
+  web_client.chat_postMessage(channel: emoji_notification_channel, text: message, as_user: true)
 end
 
 realtime_client.on :channel_created do |data|
