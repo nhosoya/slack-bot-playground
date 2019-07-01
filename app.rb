@@ -19,29 +19,25 @@ realtime_client.on :hello do
   puts "Successfully connected, welcome '#{realtime_client.self.name}' to the '#{realtime_client.team.name}' team at https://#{realtime_client.team.domain}.slack.com."
 end
 
-realtime_client.on :reaction_removed do |data|
-  user_info = web_client.users_info(user: data.user)
-  message = "#{user_info.user.name} が :#{data.reaction}: のリアクションを消したよ"
-  puts message
-  web_client.reactions_add(name: data.reaction, channel: data.item.channel, timestamp: data.item.ts)
-end
+# realtime_client.on :reaction_removed do |data|
+#   user_info = web_client.users_info(user: data.user)
+#   message = "#{user_info.user.name} が :#{data.reaction}: のリアクションを消したよ"
+#   puts message
+#   web_client.reactions_add(name: data.reaction, channel: data.item.channel, timestamp: data.item.ts)
+# end
 
 realtime_client.on :emoji_changed do |data|
-  break unless data.subtype == 'add'
+  next unless data.subtype == 'remove'
 
-  message = if data.value.start_with?('alias:')
-    "`:#{data.name}:` が :#{data.value.split(":").last}: のaliasとして追加されたよ。使っていこう！"
-  else
-    ":#{data.name}: が追加されたよ。使っていこう！"
-  end
-
+  puts data.names.inspect
+  message = ":#{data.names.join(', ')}: が削除されたよ :dousite:"
   web_client.chat_postMessage(channel: emoji_notification_channel, text: message, as_user: true)
 end
 
-realtime_client.on :channel_created do |data|
-  user_info = web_client.users_info(user: data.channel.creator)
-  message = "#{user_info.user.name} が ##{data.channel.name} を作ったよ。そーっとのぞいてみよう！"
-  web_client.chat_postMessage(channel: channel_notification_channel, text: message, as_user: true)
-end
+# realtime_client.on :channel_created do |data|
+#   user_info = web_client.users_info(user: data.channel.creator)
+#   message = "#{user_info.user.name} が ##{data.channel.name} を作ったよ。そーっとのぞいてみよう！"
+#   web_client.chat_postMessage(channel: channel_notification_channel, text: message, as_user: true)
+# end
 
 realtime_client.start!
